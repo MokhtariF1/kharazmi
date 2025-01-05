@@ -1,0 +1,12 @@
+div{
+    font-size: medium;
+}
+.header {
+    font-size: 30px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 20px;
+}
+#owner{
+    color: red;
+}
