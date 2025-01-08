@@ -12,7 +12,7 @@ async def management():
     async with async_playwright() as p:
         requests = {"requests": [{"id": 1, "type": "send_joke", "channel_id": "-69878697", "text": "تست ربات ایتا", "sended": False}, {"id": 2, "type": "send_joke", "channel_id": "-69878697", "text": "تست ربات ایتا 2", "sended": False}, {"id": 3,"type": "send_joke", "channel_id": "-69878697", "text": "بردیوار زندگی ام نوشتم ورود ممنوع ، بگایی آمد و گفت بی سوادم", "sended": False}]}
         # بالا آوردن مرورگر مورد نظر برای انجام عملیات
-        browser = await p.chromium.launch(headless=False)
+        browser = await p.chromium.launch(headless=True)
         context = await browser.new_context()
         # ساخت صفحه جدید در مرورگر
         page = await context.new_page()
