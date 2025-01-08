@@ -55,7 +55,7 @@ async def management():
                         await page.goto(f"https://web.eitaa.com/#{request['channel_id']}")
                         response = await methods.send_message(page, request)
                         if response == 200:
-                            print(f"message with id {request["id"]} posted to eitaa")
+                            print(f"message with id {request['id']} posted to eitaa")
                             await asyncio.sleep(5)
                     elif request["type"] == "send_joke":
                         response = await methods.send_joke(page, request["channel_id"])
