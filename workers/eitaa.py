@@ -40,7 +40,8 @@ async def management():
             except ValueError:
                 print("لطفا یک عدد وارد کنید!")
         await page.get_by_role("textbox").fill(str(get_code))
-        await page.pause()
+        print("please wait 20 sec...")
+        await asyncio.sleep(20)
         while True:
             # چک کردن اینکه آیا درخواستی در مونگو دی بی وجود دارد که انجام نشده باشد یا خیر
             if len(requests["requests"]) == 0:
