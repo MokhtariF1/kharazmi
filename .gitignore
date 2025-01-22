@@ -1,0 +1,10 @@
+.venv
+__pycache__
+.streamlit
+.idea
+Test1
+t.txt
+telegram_bots.txt
+test.py
+test2.py
+*.xml
