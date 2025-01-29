@@ -8,6 +8,13 @@
     text-align: right;
     margin-bottom: 20px;
 }
+.right-header {
+    font-size: 30px;
+    font-weight: bold;
+    text-align: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
 #owner{
     color: red;
 }

@@ -1,11 +1,15 @@
 import requests
 import time
 s = time.perf_counter()
+count = 0
 url = "http://127.0.0.1:8000/?text={}"
-for i in range(1, 10):
-    url = f"http://127.0.0.1:8000/send-message/?text=**تست** __{i}__&peer_id=-70896711"
+for i in range(1, 31):
+    r = requests.get("https://api.keybit.ir/ayamidanid/").json()["text"]
+    url = f"http://127.0.0.1:8000/send-message/?text={r}&peer_id=-69878697"
     response = requests.post(url)
-    print(response.json())
+    count += 1
+    time.sleep(5)
 e = time.perf_counter()
 
 print(e - s)
+print(count)

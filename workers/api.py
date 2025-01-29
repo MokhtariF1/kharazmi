@@ -29,4 +29,7 @@ async def SendMessage(text, peer_id, reply=None):
     request_id = document.inserted_id
     result = send_message.delay(str(request_id), text, peer_id, reply)
     result = result.get()
-    return Response(json.dumps(result))
+    if result["status"] == 200:
+        return Response(json.dumps(result))
+    else:
+        return Response(json.dumps(result), status_code=500)
