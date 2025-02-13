@@ -1,7 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@700&display=swap');
-/* div{
-    font-size: medium;
-} */
+
 .header {
     font-size: 30px;
     font-weight: bold;
@@ -26,9 +24,3 @@
     direction: rtl;
     text-align: center;
 }
-/* body {
-    font-family: "Vazirmatn", serif;
-    font-optical-sizing: auto;
-    font-weight: 700;
-    font-style: normal;
-} */

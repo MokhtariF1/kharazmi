@@ -20,14 +20,14 @@ async def GetMe():
     info = info.get()
     return Response(json.dumps(info))
 @app.post("/send-message/")
-async def SendMessage(text, peer_id, reply=None):
+async def SendMessage(text, peer_id):
     document = requests_collection.insert_one({
         "request_type": "send_message",
         "status": 202,
         "result": None,
     })
     request_id = document.inserted_id
-    result = send_message.delay(str(request_id), text, peer_id, reply)
+    result = send_message.delay(str(request_id), text, peer_id)
     result = result.get()
     if result["status"] == 200:
         return Response(json.dumps(result))

@@ -2,3 +2,4 @@ streamlit
 playwright
 fastapi
 pymongo
+art
