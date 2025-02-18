@@ -3,3 +3,4 @@ playwright
 fastapi
 pymongo
 art
+celery
