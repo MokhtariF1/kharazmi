@@ -1,2 +1,6 @@
 import streamlit as st
-st.markdown(":rainbow[Your panel statistics:\nAPI requests: 5\nChannels count: 4\n]")
+
+
+with open("style.css") as css:
+    st.markdown("<style>" + css.read() + "</style>", unsafe_allow_html=True)
+st.title("به زودی...")
