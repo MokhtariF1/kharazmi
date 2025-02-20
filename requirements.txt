@@ -4,3 +4,4 @@ fastapi
 pymongo
 art
 celery
+pyperclip
