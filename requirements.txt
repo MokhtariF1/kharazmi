@@ -5,3 +5,4 @@ pymongo
 art
 celery
 pyperclip
+fastapi[standard]
