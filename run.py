@@ -32,11 +32,6 @@ def run_fastapi():
     print("در حال اجرای وب سرویس...")
     subprocess.Popen(["uvicorn", "api:app"])
 
-def run_streamlit():
-    print("درحال اجرای پنل مدیریت...")
-    os.chdir("..")
-    subprocess.Popen(["streamlit", "run", "main_page.py"])
-
 def main():
     # نصب نیازمندی ها
     install_requirements()
@@ -51,9 +46,6 @@ def main():
 
     # اجرای fastApi
     run_fastapi()
-
-    # اجرای پنل مدیریت
-    run_streamlit()
     
     print("تمام سرویس ها با موفقیت اجرا شد!")
 
