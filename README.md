@@ -7,19 +7,19 @@
 ## 📦 راه‌اندازی پروژه
 
 ابتدا پیش نیاز ها را روی سیستم خود نصب کنید:
-1.Python
-2.RabbitMQ
-3.MongoDB
-4.Google Chrome
-1. کلون کردن ریپوزیتوری:
+1.Python \n
+2.RabbitMQ \n
+3.MongoDB \n
+4.Google Chrome \n
+1. کلون کردن ریپوزیتوری: \n
    `bash
-   git clone https://github.com/MokhtariF1/kharazmi.git
-2.اجرای آسان پروژه:
+   git clone https://github.com/MokhtariF1/kharazmi.git \n
+2.اجرای آسان پروژه: \n
    `bash
-   cd Kharazmi
-   python3 run.py
-   3.اجرای پنل کاربر در صورت نیاز:
+   cd Kharazmi \n
+   python3 run.py \n
+   3.اجرای پنل کاربر در صورت نیاز: \n
    `bash
-   pip install streamlit
-   streamlit run main_page.py
+   pip install streamlit \n
+   streamlit run main_page.py \n
    
