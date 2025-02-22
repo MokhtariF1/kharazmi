@@ -40,27 +40,4 @@ ___
 - و تمام! اگر تنظیمات درست باشد نظرات کاربران به ایمیل شما ارسال خواهد شد
 ___
 # 🏃 ارسال درخواست به وب سرویس ها
-```python
-import requests
-
-# ارسال درخواست به وب سرویس ارسال پیام
-url = "http://localhost:8000/send-message?peer_id={peer_id}&text={text}"
-
-response = requests.post(url)
-
-if response.status_code == 200:
-    result = response.json()
-    print(result)
-else:
-    print(f"Error: {response.status_code}")
-
-# ارسال درخواست به وب سرویس دریافت اطلاعات اکانت
-url = "http://localhost:8000/get-me"
-
-response = requests.post(url)
-
-if response.status_code == 200:
-    result = response.json()
-    print(result)
-else:
-    print(f"Error: {response.status_code}")
+[مستندات وب سرویس](https://github.com/MokhtariF1/kharazmi/wiki)
