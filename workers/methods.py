@@ -61,9 +61,7 @@ def send_message(document_id, text, peer_id_get):
         before_sent_time = time.time()
         while is_sent != True:
             now_sent_time = time.time()
-            # print(before_sent_time - now_sent_time)
             if now_sent_time - before_sent_time > 4:
-                print("_____is_sent")
                 is_sent = True
                 result = {
                     "status": 522,
@@ -96,7 +94,6 @@ def send_message(document_id, text, peer_id_get):
             page.close()
             return result
         except:
-            print("error load")
             result = {
                 "status": 500,
                 "request_type": "send_message",

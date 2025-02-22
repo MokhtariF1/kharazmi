@@ -10,7 +10,6 @@ def send_message(peer_id, text):
     if peer_id == "" or text == "":
         st.error("لطفا فرم ها را پر کنید!")
         return
-    print("___________", peer_id, text)
     url = f"http://127.0.0.1:8000/send-message/?peer_id={peer_id}&text={text}"
     response = requests.post(url)
     info = response.json()
