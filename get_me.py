@@ -6,7 +6,7 @@ with open("style.css") as css:
 st.markdown('<div class="right-header">دریافت اطلاعات</div>', unsafe_allow_html=True)
 
 def send_message():
-    url = "http://127.0.0.1:8000/get-me/"
+    url = "http://127.0.0.1:8000/get_me/"
     response = requests.post(url)
     info = response.json()
     if info["status"] == 200:

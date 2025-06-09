@@ -95,9 +95,9 @@ def send_email(text):
 with open("style.css") as css:
     st.markdown("<style>" + css.read() + "</style>", unsafe_allow_html=True)
 find_user = users_collection.find_one()
-with st.form("comments") as form:
-    if find_user is None or find_user["name"] is None:
-        st.error("کاربر عزیز برای ارسال نظر لطفااول در بخش اطلاعات، ثبت نام خود را کامل کنید!")
-    else:
+if find_user is None or find_user["name"] is None:
+    st.error("کاربر عزیز برای ارسال نظر لطفااول در بخش اطلاعات، ثبت نام خود را کامل کنید!")
+else:
+    with st.form("comments") as form:
         text = st.text_area("متن نظر", placeholder="یک نظر بنویسید")
         st.form_submit_button("ارسال نظر", on_click=send_email(text))
