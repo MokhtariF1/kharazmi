@@ -1,9 +1,10 @@
-from enum import member
 from playwright.sync_api import sync_playwright, TimeoutError
 import re
 from celery import Celery
 from pymongo import MongoClient
 from bson import ObjectId
+from bs4 import BeautifulSoup
+import requests
 import pyperclip
 import time
 
@@ -17,18 +18,21 @@ requests_collection = db["requests"]
 @app.task
 def get_me(document_id):
     with sync_playwright() as p:
+        # وصل شدن به مرورگر
         browser = p.chromium.connect_over_cdp("http://localhost:9222")
         context = browser.contexts[0]
         page = context.new_page()
         page.goto("https://web.eitaa.com/")
         page.wait_for_selector(".c-ripple")
         page.locator(".c-ripple").first.click()
+        # کلیک روی تنظیمات
         page.locator("div").filter(has_text=re.compile(
             r"^تنظیمات$")).locator("div").click()
         page.locator("button.btn-icon.tgico-edit.rp").click()
         page.wait_for_selector("div.input-field-input")
         forms = page.query_selector_all("div.input-field-input")
         info = []
+        # دریافت اطلاعات به ترتیب در حلقه
         for form in forms:
             value = form.inner_text()
             info.append(value)
@@ -39,6 +43,7 @@ def get_me(document_id):
             "last_name": info[1],
             "bio": info[2],
         }
+        # آپدیت نتیجه در دیتابیس
         requests_collection.update_one({"_id": ObjectId(document_id)}, {
                                        "$set": {"result": info_json, "status": 200}})
         page.close()
@@ -48,11 +53,14 @@ def get_me(document_id):
 @app.task
 def send_message(document_id, text, peer_id_get):
     with sync_playwright() as p:
+        # اتصال به مرورگر
         browser = p.chromium.connect_over_cdp("http://localhost:9222")
         context = browser.contexts[0]
         page = context.new_page()
+        # رفتن به چت مورد نظر
         page.goto(f"https://web.eitaa.com/#{peer_id_get}")
         page.locator(".input-message-input").first.wait_for()
+        # تایپ متن در فیلد پیام
         page.locator(".input-message-input").first.type(text)
         page.locator("div.btn-send-container").wait_for()
         page.locator("div.btn-send-container").click()
@@ -61,8 +69,12 @@ def send_message(document_id, text, peer_id_get):
             element = page.query_selector_all('[data-mid]')[-1]
         except IndexError:
             page.goto(f"https://web.eitaa.com/#{peer_id_get}")
+        # دریافت فیلد های مورد نظر از المنت
         data_mid, timestamp, peer_id = element.get_attribute("data-mid"), element.get_attribute(
             "data-timestamp"), element.get_attribute("data-peer-id")
+        # این حلقه به دلیل همون باگ ایتا نوشته شده چون ممکنه ایتا
+        #  در اصل پیام رو ارسال کنه ولی فرانت ایتا به باگ بخوره و جوری نشون بده که ما متوجه نشیم پیام ارسال شده و برای جلوگیری
+        #  از منتظر موندن برنامه اگر ارسال پیام بیشتر از ۴ ثانیه طول کشید برنامه تشخیص میده پیام در واقعیت ارسال شده و این باگ ایتا هست که نشون نمیده
         is_sent = False
         before_sent_time = time.time()
         while is_sent != True:
@@ -81,12 +93,15 @@ def send_message(document_id, text, peer_id_get):
                 return result
             element_class = element.get_attribute("class")
             is_sent = True if "is-sent" in element_class else False
+        # کلیک راست روی پیام برای دریافت آیدی پیام
         element.click(button="right")
         message_link = None
         try:
             if str(peer_id).startswith("-"):
+                # کلیک روی کپی لینک پیام
                 page.locator("div").filter(has_text=re.compile(
                     r"^کپی لینک پیام$")).locator("div").click()
+                # خوندن متن کپی شده از کلیپ بورد سیستم
                 message_link = pyperclip.paste()
                 message_link = message_link.split('/')[-1]
             result = {
@@ -97,8 +112,10 @@ def send_message(document_id, text, peer_id_get):
                 "timestamp": timestamp,
                 "data_mid": element.get_attribute("data-mid"),
             }
+            # بروزرسانی خروجی توی دیتابیس
             requests_collection.update_one({"_id": ObjectId(document_id)}, {
                                            "$set": {"result": result, "status": 200}})
+            # بستن صفحه مرورگر
             page.close()
             return result
         except:
@@ -122,12 +139,15 @@ def get_chat_members(document_id, peer_id):
         context = browser.contexts[0]
         page = context.new_page()
         page.goto(f"https://web.eitaa.com/#{peer_id}")
+        # کلیک کردن روی بخش بالایی چت برای بازکردن اطلاعات چت
         page.locator("div.sidebar-header.topbar").click()
         try:
             page.wait_for_selector(
                 "div.search-super-content-members ul.chatlist")
         except TimeoutError:
             return 500, []
+        # اسکرول کردن به پایین ترین حد ممکن در لیست چت های گروه به خاطر اینکه ایتا در حالت عادی ۵۰ چت اول رو نشون میده و برای مشاهده همه چت ها باید اسکرول کرد
+        # همچنین برای اینکه بشه راحت و بهترین حالت اسکرول رو پیاده کرد از تیکه کد جاوااسکریپت برای این کار استفاده شده که برای استفاده از کد های جاوااسکریپت در پلی رایت از فانکشن evaluate استفاده میشه
         page.evaluate('''const s = document.querySelector("div.scrollable.scrollable-y.no-parallax")
                       s.scrollTop = s.scrollHeight
                       ''')
@@ -135,6 +155,7 @@ def get_chat_members(document_id, peer_id):
         members = page.locator(
             "div.search-super-content-members ul.chatlist li.chatlist-chat")
         members_list = []
+        # در آخر حلقه میزنیم تا اطلاعات کل ممبر هارو بگیریم
         for i in range(members.count()):
             member = members.nth(i)
             user_peer_id = member.get_attribute("data-peer-id")
@@ -144,10 +165,51 @@ def get_chat_members(document_id, peer_id):
                 "name": name,
             }
             members_list.append(user)
+        # و آپدیت اطلاعات توی دیتابیس
         requests_collection.update_one({"_id": ObjectId(document_id)}, {
                                        "$set": {"result": members_list, "status": 200, "count": len(members_list)}})
         return 200, members_list
 
 
-# @app.task
-# def get_chat_info(document_id, peer_id):
+@app.task
+def get_chat_info(document_id, peer_id):
+    with sync_playwright() as p:
+        browser = p.chromium.connect_over_cdp("http://localhost:9222")
+        context = browser.contexts[0]
+        page = context.new_page()
+        page.goto(f"https://web.eitaa.com/#{peer_id}")
+        page.wait_for_selector("div.sidebar-header.topbar")
+        # روی بخش بالایی چت برای بازکردن اطلاعاتش کلیک میشه
+        page.locator("div.sidebar-header.topbar").click()
+        # این اول ترکیب bs4 با پلی رایت در این پروژه هست
+        # به دلیل اینکه این بخش با پلی رایت یک سری مشکلات و باگ ها داشت از bs4 برای دریافت اطلاعات چت استفاده کردم 
+        # که خیلی به شدت سریع تر و بدون باگ تر اطلاعات رو دریافت و خروجی میده
+        soup = BeautifulSoup(page.content(), "html.parser")
+        # پیدا کردن اسم
+        chat_name = soup.find("div", attrs={"class": "profile-name"})
+        chat_name = chat_name.text if chat_name.text != " " else None
+        # پیدا کردن شماره 
+        phone = soup.find(
+            "div", attrs={"class": "row-title tgico tgico-phone"})
+        phone = phone.text if phone.text != " " else None
+        # پیدا کردن نام کاربری
+        username = soup.find(
+            "div", attrs={"class": "row-title tgico tgico-username"})
+        username = username.text if username.text != " " else None
+        # پیدا کردن بیو کاربر
+        bio = soup.find(
+            "div", attrs={"class": "row-title tgico tgico-info pre-wrap"})
+        print(bio)
+        bio = bio.text if bio.text != " " else None
+        # اگر هر کدوم از اطلاعات رو کاربر نداشته باشه None خروجی داده میشه
+        # و در نهایت خروجی دادن و آپدیت اطلاعات در دیتابیس
+        response = {
+            "status": 200,
+            "username": username,
+            "phone": phone,
+            "name": chat_name,
+            "bio": bio,
+        }
+        requests_collection.update_one({"_id": ObjectId(document_id)}, {
+                                       "$set": {"result": response, "status": 200}})
+        return response
