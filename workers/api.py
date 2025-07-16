@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Response
-from methods import get_me as get_me_task, send_message as send_message_task, get_chat_members as get_chat_members_task, get_chat_info as get_chat_info_task
+from methods import get_me as get_me_task, send_message as send_message_task, get_chat_members as get_chat_members_task, get_chat_info as get_chat_info_task, change_account_info as change_account_info_task
 from pymongo import MongoClient
 import json
 
@@ -56,6 +56,7 @@ async def get_chat_members(peer_id: str):
     }
     return Response(json.dumps(info), status_code=status)
 
+
 @app.post("/get_chat_info/")
 async def get_chat_info(peer_id):
     document = requests_collection.insert_one({
@@ -65,5 +66,12 @@ async def get_chat_info(peer_id):
     })
     request_id = document.inserted_id
     result = get_chat_info_task.delay(str(request_id), peer_id)
+    result = result.get()
+    return Response(json.dumps(result), status_code=200)
+
+
+@app.put("/change_account_info/")
+async def change_account_info(first_name: str = None, last_name: str = None, bio: str = None):
+    result = change_account_info_task.delay(first_name, last_name, bio)
     result = result.get()
     return Response(json.dumps(result), status_code=200)

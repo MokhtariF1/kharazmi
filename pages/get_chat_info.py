@@ -27,7 +27,7 @@ def display_chat_info(info):
     phone = "ثبت نشده" if info['phone'] is None else info["phone"]
     name = "ثبت نشده" if info['name'] is None else info["name"]
     bio = "ثبت نشده" if info['bio'] is None else info["bio"]
-    text = f"نام کاربری: {username}\nنام: {name}\nشماره تلفن: {phone}\nبیوگرافی: {bio}"
+    text = f"نام کاربری: {username} & نام: {name} & شماره تلفن: {phone} & بیوگرافی: {bio}"
     st.info(text)
 with st.form("GetChatInfo"):
     chat_id = st.text_input("شناسه چت", placeholder="-1234567890")

@@ -22,9 +22,14 @@ try:
         send_message = st.Page(
             "pages/send_message.py", title="ارسال پیام", icon="✍🏻")
         get_me = st.Page("pages/get_me.py", title="پروفایل من", icon="👤")
-        get_chat_members = st.Page("pages/get_chat_members.py", title="اعضای گروه", icon="💎")
-        get_chat_info = st.Page("pages/get_chat_info.py", title="اطلاعات چت", icon="💬")
-        pg = st.navigation([send_message, get_me, get_chat_members, get_chat_info])
+        get_chat_members = st.Page(
+            "pages/get_chat_members.py", title="اعضای گروه", icon="💎")
+        get_chat_info = st.Page("pages/get_chat_info.py",
+                                title="اطلاعات چت", icon="💬")
+        change_account_info = st.Page(
+            "pages/change_account_info.py", title="تغییر اطلاعات اکانت", icon="✏")
+        pg = st.navigation(
+            [send_message, get_me, get_chat_members, get_chat_info, change_account_info])
         pg.run()
         authenticator.logout(button_name="خروج", location="sidebar")
         # تکه کد زیر برای حذف کردن دکمه deploy پیشفرض streamlit است

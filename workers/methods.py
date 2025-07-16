@@ -140,7 +140,11 @@ def get_chat_members(document_id, peer_id):
         page = context.new_page()
         page.goto(f"https://web.eitaa.com/#{peer_id}")
         # کلیک کردن روی بخش بالایی چت برای بازکردن اطلاعات چت
-        page.locator("div.sidebar-header.topbar").click()
+        page.wait_for_selector('//*[@id="column-center"]/div/div/div[2]')
+        print(page.query_selector('//*[@id="column-center"]/div/div/div[2]').inner_html())
+        page.query_selector('//*[@id="column-center"]/div/div/div[2]').query_selector("div.chat-info").click()
+        # روش ۲: با XPath (اگر CSS جواب نداد)
+        # await page.locator('xpath=//div[starts-with(@class, "sidebar-header topbar")]').click()
         try:
             page.wait_for_selector(
                 "div.search-super-content-members ul.chatlist")
@@ -168,6 +172,7 @@ def get_chat_members(document_id, peer_id):
         # و آپدیت اطلاعات توی دیتابیس
         requests_collection.update_one({"_id": ObjectId(document_id)}, {
                                        "$set": {"result": members_list, "status": 200, "count": len(members_list)}})
+        page.close()
         return 200, members_list
 
 
@@ -182,13 +187,13 @@ def get_chat_info(document_id, peer_id):
         # روی بخش بالایی چت برای بازکردن اطلاعاتش کلیک میشه
         page.locator("div.sidebar-header.topbar").click()
         # این اول ترکیب bs4 با پلی رایت در این پروژه هست
-        # به دلیل اینکه این بخش با پلی رایت یک سری مشکلات و باگ ها داشت از bs4 برای دریافت اطلاعات چت استفاده کردم 
+        # به دلیل اینکه این بخش با پلی رایت یک سری مشکلات و باگ ها داشت از bs4 برای دریافت اطلاعات چت استفاده کردم
         # که خیلی به شدت سریع تر و بدون باگ تر اطلاعات رو دریافت و خروجی میده
         soup = BeautifulSoup(page.content(), "html.parser")
         # پیدا کردن اسم
         chat_name = soup.find("div", attrs={"class": "profile-name"})
         chat_name = chat_name.text if chat_name.text != " " else None
-        # پیدا کردن شماره 
+        # پیدا کردن شماره
         phone = soup.find(
             "div", attrs={"class": "row-title tgico tgico-phone"})
         phone = phone.text if phone.text != " " else None
@@ -212,4 +217,38 @@ def get_chat_info(document_id, peer_id):
         }
         requests_collection.update_one({"_id": ObjectId(document_id)}, {
                                        "$set": {"result": response, "status": 200}})
+        page.close()
+        return response
+
+
+@app.task
+def change_account_info(first_name=None, last_name=None, bio=None):
+    with sync_playwright() as p:
+        # وصل شدن به مرورگر
+        browser = p.chromium.connect_over_cdp("http://localhost:9222")
+        context = browser.contexts[0]
+        page = context.new_page()
+        page.goto("https://web.eitaa.com/")
+        page.wait_for_selector(".c-ripple")
+        page.locator(".c-ripple").first.click()
+        # کلیک روی تنظیمات
+        page.locator("div").filter(has_text=re.compile(
+            r"^تنظیمات$")).locator("div").click()
+        page.locator("button.btn-icon.tgico-edit.rp").click()
+        page.wait_for_selector("div.input-field-input")
+        forms = page.query_selector_all("div.input-field-input")
+        # بروزرسانی اطلاعات وارد شده پروفایل
+        for index, form in enumerate(forms):
+            if first_name != None and index == 0:
+                form.fill(first_name)
+            if last_name != None and index == 1:
+                form.fill(last_name)
+            if bio != None and index == 2:
+                form.fill(bio)
+        # کلیک روی ذخیره اطلاعات
+        page.locator(
+            "button.btn-circle btn-corner z-depth-1 tgico-check rp is-visible".replace(" ", ".")).click()
+        response = {"status": 200,
+            "message": "Account info updated successfully"}
+        page.close()
         return response
